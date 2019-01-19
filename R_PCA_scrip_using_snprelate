@@ -1,0 +1,17 @@
+if (!requireNamespace("BiocManager", quietly = TRUE))
+  BiocManager::install("SNPRelate", version = "3.8")
+BiocManager::install("gdsfmt", version = "3.8")
+library(gdsfmt)
+library(SNPRelate)
+vcf.fn<-"for_turkey_noSirna066_TK_WGS.VF.SNP.recode.vcf"
+snpgdsVCF2GDS(vcf.fn, "ccm.gds",  method="biallelic.only")
+snpgdsSummary("ccm.gds")
+genofile <- snpgdsOpen("ccm.gds")
+head(genofile)
+ccm_pca<-snpgdsPCA(genofile,autosome.only=FALSE)
+sample.id <- read.gdsn(index.gdsn(genofile, "sample.id"))
+
+##make the figures on desktop
+save(ccm_pca, file="ccm_pca.rds")  ##on cluster
+load("ccm_pca.rds") ## load onto R studio on local machine
+
