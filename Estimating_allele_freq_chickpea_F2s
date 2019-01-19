@@ -1,0 +1,4 @@
+f2_freq<-read.table("Besev079_F2_ICCV96029.CDCFrontier_GA_v1.VF.SNP_missing0.9_freq.frq", sep="\t", header = T, row.names=NULL,comment.char = "")
+fre_0.35_0.65<-subset(f2_freq, X.FREQ.>0.35 & X.FREQ.<0.65)
+hist(f2_freq$X.FREQ., main = "ICCV96029_x_Besev079_F2 frequency distribution", xlab = "AF")
+aus_geno_pheno<-merge(fulltable_flowering_ret_mb,aus_geno, by.x = "Varma.code", by.y = "V1")
