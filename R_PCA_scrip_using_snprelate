@@ -3,6 +3,7 @@ if (!requireNamespace("BiocManager", quietly = TRUE))
 BiocManager::install("gdsfmt", version = "3.8")
 library(gdsfmt)
 library(SNPRelate)
+library(ggplot2)
 vcf.fn<-"for_turkey_noSirna066_TK_WGS.VF.SNP.recode.vcf"
 snpgdsVCF2GDS(vcf.fn, "ccm.gds",  method="biallelic.only")
 snpgdsSummary("ccm.gds")
@@ -14,4 +15,39 @@ sample.id <- read.gdsn(index.gdsn(genofile, "sample.id"))
 ##make the figures on desktop
 save(ccm_pca, file="ccm_pca.rds")  ##on cluster
 load("ccm_pca.rds") ## load onto R studio on local machine
+load("ccm_pca__chikpeapca.rds")
+sample.id_chick<-ccm_pca$sample.id
+write.table(ccm_pca$sample.id, "sample.id_chick.txt", sep="\t", quote=F, row.names = F)
+sample.id_chick_new<-read.table("sample.id_chick.txt",header=T)
+sample.id_chick_new[,"Species"] <- pop_all_samples$Species[match(sample.id_chick_new$x, pop_all_samples$INDV)]
+pop_chickpea<-sample.id_chick_new["Species"]
+colnames(pop_chickpea)<-NULL
+write.table(pop_chickpea,"pop_chickpea.txt", sep="\t",row.names=F)
+pop_code<- scan("pop_chickpea.txt", what=character())
+cbind( ccm_pca$sample.idd, pop_code)
+names(tab)[2]<-"Species"
+names(tab)[3]<-"PC1"
+names(tab)[4]<-"PC2"
+tab <- data.frame(sample.id = ccm_pca$sample.id,pop = factor(pop_code)[match(ccm_pca$sample.id, sample.id)],EV1 =ccm_pca$eigenvect[,1],EV2 = ccm_pca$eigenvect[,2],stringsAsFactors = FALSE)
+ggplot(tab, aes(x=PC1, y=PC2)) + geom_point(aes(colour=Species), size=3) + scale_color_manual(breaks = c("Cicer arietinum","Cicer echinospermum","Cicer reticulatum"), values = c("black","red", "blue"))+theme(text = element_text(size=15))
 
+####ccm_pca$varprop*100 ## percentage variance explained by each PC
+###chloroplast
+load("ccm_pca_chloroplast.rds")
+genofile <- snpgdsOpen("ccm.gds")
+sample.id <- read.gdsn(index.gdsn(genofile, "sample.id"))
+sample.id_chloro<-ccm_pca$sample.id
+write.table(ccm_pca$sample.id, "sample.id_chloro.txt", sep="\t", quote=F, row.names = F)
+sample.id_chloro_new<-read.table("sample.id_chloro.txt",header=T)
+sample.id_chloro_new[,"Species"] <- pop_all_samples$Species[match(sample.id_chloro_new$x, pop_all_samples$INDV)]
+pop_chloroplast<-sample.id_chloro_new["Species"]
+colnames(pop_chloroplast)<-NULL
+write.table(pop_chloroplast,"pop_chloroplast.txt", sep="\t",row.names=F)
+pop_code<- scan("pop_chloroplast.txt", what=character())
+cbind( ccm_pca$sample.idd, pop_code)
+tab <- data.frame(sample.id = ccm_pca$sample.id,pop = factor(pop_code)[match(ccm_pca$sample.id, sample.id)],EV1 =ccm_pca$eigenvect[,1],EV2 = ccm_pca$eigenvect[,2],stringsAsFactors = FALSE)
+names(tab)[2]<-"Species"
+names(tab)[3]<-"PC1"
+names(tab)[4]<-"PC2"
+ggplot(tab, aes(x=PC1, y=PC2)) + geom_point(aes(colour=Species), size=3) + scale_color_manual(breaks = c("Cicer arietinum","Cicer echinospermum","Cicer reticulatum"), values = c("black","red", "blue"))+theme(text = element_text(size=15))
+head((ccm_pca$varprop*100), 32)
