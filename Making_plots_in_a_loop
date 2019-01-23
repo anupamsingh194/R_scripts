@@ -1,0 +1,8 @@
+myFiles <- list.files(pattern="*.frq") 
+pdf("test_hist1.pdf")
+par(mfrow = c(3, 5)) 
+for (i in myFiles){ 
+freq_file<-read.table(i, sep="\t", comment.char="!",header=T,row.names=NULL)
+hist(freq_file$X.FREQ., main=i)
+}
+dev.off()  
