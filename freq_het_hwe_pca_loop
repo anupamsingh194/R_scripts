@@ -1,0 +1,53 @@
+##frequency distribution
+myFiles <- list.files(pattern="*.frq")
+pdf("frequency_dist.pdf", width = 28, height = 18)
+par(mfrow = c(3, 5))
+for (i in myFiles){
+freq_file<-read.table(i, sep="\t", comment.char="!",header=T,row.names=NULL) 
+hist(freq_file$X.FREQ., main=i)
+}
+dev.off()
+
+
+## hwe : maf0.35, max-missing
+my_files1<-(pattern="*.hwe")
+pdf("hwe_dist.pdf", width = 28, height = 18)
+par(mfrow = c(3, 5))
+for (i in my_files1){
+hwe_file<-read.table(i, sep="\t", comment.char="!",header=T,row.names=NULL)
+hist(hwe_file$ChiSq_HWE, main=i)
+}
+dev.off()
+
+
+
+###het ditribution
+my_files2<-list.files(pattern='*.het')
+pdf("het_dist.pdf", width = 28, height = 18)
+par(mfrow = c(3, 5))
+for (i in my_files2){
+het_file<-read.table("i", sep="\t", comment.char="!",header=T,row.names=NULL)
+het_file$Heterozygocity<-(het_file$O.HOM./het_file$N_SITES)
+plot(het_file$N_SITES,het_file$Heterozygocity, col=ifelse(grepl("_F2", het_file$INDV),"black","red"))
+}
+dev.off()
+
+
+
+##PCA 
+
+library(gdsfmt)
+library(SNPRelate)
+pdf("pca_color_plot.pdf", width = 28, height = 18)
+par(mfrow = c(3, 5))
+my_vcf_files<-list.files(pattern="*..individuals.maxmiss0.8_maf0.03.vcf")
+for (i in my_vcf_files){
+snpgdsVCF2GDS(vcf.fn, paste0(i,"ccm.gds"),  method="biallelic.only")
+snpgdsSummary(paste0(i,"ccm.gds"))
+genofile <- snpgdsOpen(paste0(i,"ccm.gds"))
+ccm_pca_i<-snpgdsPCA(genofile,autosome.only=FALSE)
+tab <- data.frame(sample.id = ccm_pca_i$sample.id,PC1 =ccm_pca_i$eigenvect[,1],PC2 = ccm_pca_i$eigenvect[,2])
+plot(tab$PC1, tab$PC2, main =i, col=ifelse(grepl("_F2", tab$sample.id), "black", "red"))
+}
+
+dev.off()
