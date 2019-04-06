@@ -1,0 +1,10 @@
+chimera_file<-read.table("candidate_chimera_ICCV96029_x_Bari1092.miAF30.80.FSFHap_w50_o10.tab.ICCV96029_MSTmarkers_contigs_subcontigs", sep="\t", comment.char="!",header=T,row.names=NULL)
+master_chimera<-chimera_file[,1:6]
+myFiles <- list.files(pattern="candidate_chimera_*")
+for (i in myFiles){
+  chimera_file1<-read.table(i, sep="\t", comment.char="!",header=T,row.names=NULL)
+  master_chimera<-cbind(master_chimera, chimera_file1[,7])
+  names(master_chimera)[length(names(master_chimera))]<-i
+}
+  
+write.table(master_chimera, "per_population_chimera_breakpoint_inofrmation.txt", sep="\t", row.names = F, quote = F)
